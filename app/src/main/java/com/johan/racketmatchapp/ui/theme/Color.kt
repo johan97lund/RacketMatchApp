@@ -1,4 +1,4 @@
-package com.example.racketmatchapp.ui.theme
+package com.johan.racketmatchapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
