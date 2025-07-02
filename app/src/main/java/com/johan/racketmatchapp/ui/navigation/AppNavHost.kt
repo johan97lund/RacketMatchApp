@@ -9,7 +9,11 @@ import com.johan.racketmatchapp.ui.screen.MainScreen
 import com.johan.racketmatchapp.ui.screen.MatchScreen
 import com.johan.racketmatchapp.ui.screen.SettingsScreen
 
-@Preview
+@Preview(
+    name = "AppNavHost on Pixel 5 (API 30)",
+    device = "id:pixel_5",  // <-- note the “:api30” suffix
+    showBackground = true
+)
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
