@@ -20,3 +20,4 @@ Slavenheter tar emot och visar samma poäng i realtid
 ## Google Play
 Projektet är redo för import i Android Studio
 Skapa en keystore innan publicering
+123
