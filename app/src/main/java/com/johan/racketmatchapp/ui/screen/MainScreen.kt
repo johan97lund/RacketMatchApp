@@ -22,6 +22,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 
+/**
+ * Composable screen for the main menu of the application.
+ *
+ * Displays a centered button for starting a new match and a settings button
+ * positioned at the bottom-left corner. The settings button includes an icon
+ * and text for navigation to the settings screen.
+ *
+ * @param onMatchClick Lambda function to handle the "New Match" button click.
+ * @param onSettingsClick Lambda function to handle the "Settings" button click.
+ */
 @Composable
 fun MainScreen(
     onMatchClick: () -> Unit,
@@ -32,7 +42,7 @@ fun MainScreen(
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        // CENTRERAD STOR "Starta Match"-knapp
+        // CENTRERAD STOR "Ny Match"-knapp
         Button(
             onClick = onMatchClick,
             modifier = Modifier
@@ -41,9 +51,10 @@ fun MainScreen(
                 .height(80.dp)
         ) {
             Text(
-                text = "Starta Match",
+                text = "Ny Match",
                 style = MaterialTheme.typography.titleLarge
             )
+
         }
 
         // INSTÄLLNINGAR nere till vänster med ikon

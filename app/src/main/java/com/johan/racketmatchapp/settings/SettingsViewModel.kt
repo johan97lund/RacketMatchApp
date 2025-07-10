@@ -9,7 +9,22 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for managing the settings screen's state and user preferences.
+ *
+ * Provides UI state for dark mode and language preferences, and exposes
+ * methods to update these preferences. The preferences are stored and
+ * retrieved using the [UserPreferences] class.
+ *
+ * @param app The [Application] instance used to initialize the ViewModel.
+ */
 class SettingsViewModel(app: Application) : AndroidViewModel(app) {
+
+    /**
+     * Represents the UI state for the settings screen.
+     *
+     * @property darkMode Indicates whether dark mode is enabled.
+     */
     private val prefs = UserPreferences(app)
 
     // UI-state som Compose kan läsa

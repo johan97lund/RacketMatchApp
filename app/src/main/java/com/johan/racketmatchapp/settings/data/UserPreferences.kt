@@ -7,7 +7,15 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-
+/**
+ * Handles user preference storage and retrieval using Jetpack DataStore.
+ *
+ * Provides reactive flows for dark mode and language preferences, and exposes
+ * suspend functions to update these preferences. Preferences are persisted in
+ * a private DataStore named "settings_prefs".
+ *
+ * @param context The application context used to access DataStore.
+ */
 private val Context.dataStore by preferencesDataStore("settings_prefs")
 
 class UserPreferences(private val context: Context) {

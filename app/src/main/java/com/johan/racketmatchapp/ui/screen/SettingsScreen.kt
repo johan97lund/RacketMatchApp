@@ -16,7 +16,17 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenuItem
 
-
+/**
+ * Composable screen for application settings.
+ *
+ * TODO - Implement more user settings and document them.
+ * Provides options for toggling dark mode and selecting the app's language.
+ * The language selection updates the app's locale and restarts the activity
+ * to apply the changes.
+ *
+ * @param onBack Lambda function to handle the back navigation action.
+ * @param viewModel The [SettingsViewModel] instance used to manage the UI state.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
