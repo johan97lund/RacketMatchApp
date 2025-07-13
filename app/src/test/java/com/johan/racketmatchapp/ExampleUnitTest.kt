@@ -1,4 +1,4 @@
-package com.example.racketmatchapp
+package com.johan.racketmatchapp
 
 import org.junit.Test
 
