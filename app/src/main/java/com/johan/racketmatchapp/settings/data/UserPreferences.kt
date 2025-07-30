@@ -5,7 +5,9 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.johan.racketmatchapp.settings.AppLanguage
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 /**
  * Handles user preference storage and retrieval using Jetpack DataStore.
@@ -19,24 +21,36 @@ import kotlinx.coroutines.flow.map
 private val Context.dataStore by preferencesDataStore("settings_prefs")
 
 class UserPreferences(private val context: Context) {
-    companion object {
-        private val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")
-        private val LANGUAGE_KEY = stringPreferencesKey("language")
+
+    private companion object {
+        val DARK_MODE_KEY  = booleanPreferencesKey("dark_mode")
+        val LANGUAGE_KEY   = stringPreferencesKey("language")
     }
+
+    /** Emits true/false, default false. */
     val darkModeFlow: Flow<Boolean> = context.dataStore.data
         .map { prefs -> prefs[DARK_MODE_KEY] ?: false }
 
-    val languageFlow: Flow<String> = context.dataStore.data
-        .map { prefs -> (prefs[LANGUAGE_KEY] ?: "sv") as String }   //default på Svenska
+    /** Emits AppLanguage, default Svenska. */
+    val languageFlow: Flow<AppLanguage> = context.dataStore.data
+        .map { prefs ->
+            prefs[LANGUAGE_KEY]
+                ?.let { runCatching { AppLanguage.valueOf(it) }.getOrNull() }
+                ?: AppLanguage.SV          // default
+        }
+
+    /* -------- setters that write to disk -------- */
 
     suspend fun setDarkMode(enabled: Boolean) {
-        context.dataStore.edit { prefs ->
-            prefs[DARK_MODE_KEY] = enabled
-        }
+        context.dataStore.edit { it[DARK_MODE_KEY] = enabled }
     }
-    suspend fun setLanguage(code: String) {
-        context.dataStore.edit { prefs ->
-            prefs[LANGUAGE_KEY] = code
-        }
+
+    suspend fun setLanguage(lang: AppLanguage) {
+        context.dataStore.edit { it[LANGUAGE_KEY] = lang.name }
     }
+
+    suspend fun readDarkModeOnce(): Boolean =
+        context.dataStore.data
+            .map { it[DARK_MODE_KEY] ?: false }
+            .first()
 }

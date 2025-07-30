@@ -44,10 +44,12 @@ fun AppNavHost() {
 
         // 2. Sportval
         composable(Destinations.SportSelection.route) {
-            SportSelectionScreen { chosenSport ->
+            SportSelectionScreen ({ chosenSport ->
                 // Vid val, navigera vidare till parametriserad match-rutt
                 navController.navigate("${Destinations.Game.baseRoute}/${chosenSport.name}")
-            }
+            }, onBack = { navController.popBackStack() }
+
+            )
         }
 
         // 3. Match – parametriserad med sportType
@@ -65,7 +67,7 @@ fun AppNavHost() {
         // 4. Inställningar
         composable(Destinations.Settings.route) {
             SettingsScreen(
-                onBack = { navController.popBackStack() }
+                onBack = {  navController.popBackStack() }
             )
         }
     }

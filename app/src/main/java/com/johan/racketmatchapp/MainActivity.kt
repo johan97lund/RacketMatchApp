@@ -4,10 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.johan.racketmatchapp.settings.SettingsViewModel
+import com.johan.racketmatchapp.settings.data.UserPreferences
 import com.johan.racketmatchapp.ui.navigation.AppNavHost
 import com.johan.racketmatchapp.ui.theme.RacketMatchAppTheme
+import kotlinx.coroutines.runBlocking
+
 /**
  * Main entry point of the application.
  *
@@ -18,10 +22,12 @@ import com.johan.racketmatchapp.ui.theme.RacketMatchAppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
-            val viewModel: SettingsViewModel = viewModel()
-            val isDark = viewModel.uiState.collectAsState().value.darkMode
-            RacketMatchAppTheme(darkTheme = isDark) {
+            val settingsVM: SettingsViewModel = viewModel()
+            val uiState by settingsVM.uiState.collectAsState()
+
+            RacketMatchAppTheme(darkTheme = uiState.darkMode) {
                 AppNavHost()
             }
         }
