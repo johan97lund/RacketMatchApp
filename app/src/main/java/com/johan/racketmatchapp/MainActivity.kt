@@ -3,6 +3,8 @@ package com.johan.racketmatchapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,7 +30,9 @@ class MainActivity : ComponentActivity() {
             val uiState by settingsVM.uiState.collectAsState()
 
             RacketMatchAppTheme(darkTheme = uiState.darkMode) {
-                AppNavHost()
+                Surface {
+                    AppNavHost()
+                }
             }
         }
     }

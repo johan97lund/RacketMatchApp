@@ -1,5 +1,7 @@
 package com.johan.racketmatchapp.ui.navigation
 
+import com.johan.racketmatchapp.data.model.SportType
+
 /**
  * Object that defines the navigation destinations for the application.
  *
@@ -20,6 +22,8 @@ object Destinations {
     // BaseRoute är ”match” och i composable lägger vi till /{sportType}
     val Game             = Route("match", baseRoute = "match")
     val Settings         = Route("settings")
+
+    fun gameRoute(sport: SportType) = "${Game.baseRoute}/${sport.name}"
 
     data class Route(val route: String, val baseRoute: String = route)
 }

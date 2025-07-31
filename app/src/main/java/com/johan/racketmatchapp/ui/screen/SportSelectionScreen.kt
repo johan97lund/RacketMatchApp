@@ -69,22 +69,30 @@ fun SportSelectionScreen(
                 )
 
                 SportType.entries.forEach { sport ->
-                    Button(
-                        onClick = { onSelect(sport) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .height(56.dp)
-                    ) {
-                        Text(
-                            text = sport.name.lowercase().replaceFirstChar { it.uppercase() },
-                            fontSize = 18.sp
-                        )
-                    }
+                    SportButton(sport) { onSelect(sport) }
                 }
 
             }
         }
+    }
+}
+
+@Composable
+private fun SportButton(
+    sport: SportType,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .height(56.dp)
+    ) {
+        Text(
+            text = sport.displayName,
+            fontSize = 18.sp
+        )
     }
 }
 

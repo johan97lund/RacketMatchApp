@@ -44,9 +44,9 @@ fun AppNavHost() {
 
         // 2. Sportval
         composable(Destinations.SportSelection.route) {
-            SportSelectionScreen ({ chosenSport ->
+            SportSelectionScreen ( onSelect = { chosenSport ->
                 // Vid val, navigera vidare till parametriserad match-rutt
-                navController.navigate("${Destinations.Game.baseRoute}/${chosenSport.name}")
+                navController.navigate(Destinations.gameRoute(chosenSport))
             }, onBack = { navController.popBackStack() }
 
             )

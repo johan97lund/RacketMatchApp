@@ -45,7 +45,7 @@ fun MainScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp)
-                .background(cs.background)
+
 
         ) {
 
