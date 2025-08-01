@@ -63,20 +63,6 @@ fun MainScreen(
                 )
 
             }
-
-            // INSTÄLLNINGAR nere till vänster med ikon
-            TextButton(
-                onClick = onSettingsClick,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Inställningar"
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Inställningar")
-            }
         }
     }
 }
