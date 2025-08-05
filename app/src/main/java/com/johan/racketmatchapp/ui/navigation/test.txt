@@ -1,0 +1,78 @@
+
+
+var setScoreP1 = Int
+var setScorep2 = Int
+var scorep1 = PadelScore
+var scorep1 = PadelScore
+var tieBreakScorep1 = Int
+var tieBreakScorep2 = Int
+var tieBreak = Boolean
+var gameP1 = int
+var gamep2 = int
+var setLimit = Int
+
+enum class PadelScore {
+    LOVE, FIFTEEN, THIRTY, FORTY, ADVANTAGE
+}
+30 increase
+15
+40 15
+public func increaseScorep(player1 : Boolean){ //player1 == false -> player2    :::: player1 == true -> player1
+    if (tieBreak){
+        return calcTieBreak(player1)
+    }else{
+      return calcScoreP1(player1) // returnar event
+    }
+}
+
+func calcScoreP1(player1 : Boolean){
+     if (scorep1 = PadelScore.FORTY){
+        if (scorep2 != PadelScore.FORTY || scorep2 != PadelScore.THIRTY || scorep2 != PadelScore.Advantage){
+            gameP1++
+            return checkSetWin();
+        }
+        if (scoreP2 = PadelScore.FORTY){
+            //duece
+        }
+        if (score
+     }
+     if (scorep1 = PadelScore.THIRTY){
+
+     }
+}
+bäst av 3
+vinna = 2
+5 / 2 + 1
+3 / 2 + 1
+
+bäst av 5
+vinna = 3
+
+func checkGameWon() : Boolean{
+    val requiredWins = setLimit / 2 + 1
+    return setScoreP1 >= requiredWins
+}
+
+func checkSetWin(player1 : Boolean){
+    if (setWon){
+        setScorep1++
+        if (checkGameWon()){
+            return GameEvent.GameWon
+        }else{
+            return GameEvent.setIncrease
+        }
+    }else if (TieBreak){
+           return GameEvent.TieBreak
+    }else{
+    return GameEvent.setIncrease
+    }
+}
+
+func simpleIncrease(score : PadelScore){
+    retrun when (score){
+        PadelScore.LOVE    -> PadelScore.FIFTEEN
+        PadelScore.FIFTEEN -> PadelScore.THIRTY
+        PadelScore.THIRTY  -> PadelScore.FORTY
+        PadelScore.FORTY  -> PadelScore.Advantage
+    }
+}
