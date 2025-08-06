@@ -1,6 +1,5 @@
 package com.johan.racketmatchapp.ui.screen
 
-import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -10,11 +9,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.johan.racketmatchapp.settings.SettingsViewModel
+import com.johan.racketmatchapp.core.settings.SettingsViewModel
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenuItem
+import com.johan.racketmatchapp.core.settings.AppLanguage
+import androidx.core.os.LocaleListCompat
+
+
 
 /**
  * Composable screen for application settings.
@@ -34,24 +37,13 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val currentLang by viewModel.languageState.collectAsState()
     val context = LocalContext.current
 
-    // Språk-lista
-    val languages = listOf(
-        "sv" to "Svenska",
-        "en" to "English",
-        "es" to "Español"
-    )
+    /* ---- side‑effect: switch app locale when the enum changes ---- */
+    LaunchedEffect(uiState.language) {
+        val tags = uiState.language.name.lowercase()
+        val locales = LocaleListCompat.forLanguageTags(tags)
 
-    // När språk ändras: uppdatera locale och återstarta aktiviteten
-    LaunchedEffect(currentLang) {
-        val locale = java.util.Locale(currentLang)
-        java.util.Locale.setDefault(locale)
-        val config = context.resources.configuration
-        config.setLocale(locale)
-        context.createConfigurationContext(config)
-        (context as? Activity)?.recreate()
     }
 
     Scaffold(
@@ -60,55 +52,57 @@ fun SettingsScreen(
                 title = { Text("Inställningar") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Tillbaka")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Tillbaka"
+                        )
                     }
                 }
             )
         }
-    ) { padding ->
+    ) { paddingValues ->
         Column(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Tema-val
+            /* -------- dark‑mode toggle -------- */
             Row(
+                Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Mörkt Läge")
+                Text("Mörkt läge")
                 Switch(
                     checked = uiState.darkMode,
-                    onCheckedChange = { viewModel.toggleDarkMode(it) }
+                    onCheckedChange = viewModel::setDarkMode
                 )
             }
 
-            // Språk-val med dropdown
+            /* -------- language picker -------- */
             var expanded by remember { mutableStateOf(false) }
+
             Box {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
+                    Modifier
                         .fillMaxWidth()
                         .clickable { expanded = true }
-                        .padding(8.dp)
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Språk: ${languages.first { it.first == currentLang }.second}")
+                    Text("Språk: ${uiState.language.displayName}")
                     Spacer(Modifier.weight(1f))
                     Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
                 }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    languages.forEach { (code, label) ->
+
+                DropdownMenu(expanded, onDismissRequest = { expanded = false }) {
+                    AppLanguage.values().forEach { lang ->
                         DropdownMenuItem(
-                            text = { Text(label) },
+                            text = { Text(lang.displayName) },
                             onClick = {
-                                viewModel.selectLanguage(code)
+                                viewModel.setLanguage(lang)
                                 expanded = false
                             }
                         )

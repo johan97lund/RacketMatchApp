@@ -1,4 +1,4 @@
-package com.johan.racketmatchapp.data.model
+package com.johan.racketmatchapp.core.data.model
 
 /**
  * SportType representerar de olika racketsporter appen stödjer.
