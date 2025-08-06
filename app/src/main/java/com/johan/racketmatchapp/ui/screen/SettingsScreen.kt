@@ -1,7 +1,5 @@
 package com.johan.racketmatchapp.ui.screen
 
-import java.util.Locale
-import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -11,13 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.johan.racketmatchapp.settings.SettingsViewModel
+import com.johan.racketmatchapp.core.settings.SettingsViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenuItem
-import com.johan.racketmatchapp.settings.AppLanguage
+import com.johan.racketmatchapp.core.settings.AppLanguage
 import androidx.core.os.LocaleListCompat
 
 

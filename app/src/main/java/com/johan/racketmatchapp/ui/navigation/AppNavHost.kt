@@ -11,9 +11,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -25,7 +23,7 @@ import com.johan.racketmatchapp.ui.screen.MainScreen
 import com.johan.racketmatchapp.ui.screen.SportSelectionScreen
 import com.johan.racketmatchapp.ui.screen.MatchScreen
 import com.johan.racketmatchapp.ui.screen.SettingsScreen
-import com.johan.racketmatchapp.data.model.SportType
+import com.johan.racketmatchapp.core.data.model.SportType
 
 @Composable
 fun AppNavHost() {

@@ -1,6 +1,6 @@
 package com.johan.racketmatchapp.ui.navigation
 
-import com.johan.racketmatchapp.data.model.SportType
+import com.johan.racketmatchapp.core.data.model.SportType
 
 /**
  * Object that defines the navigation destinations for the application.
