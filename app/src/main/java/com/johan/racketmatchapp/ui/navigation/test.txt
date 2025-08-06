@@ -76,3 +76,40 @@ func simpleIncrease(score : PadelScore){
         PadelScore.FORTY  -> PadelScore.Advantage
     }
 }
+
+
+
+
+increaseScore(player){
+    if (tiebreak){
+        do tiebreak saker
+    }else{
+        calcScore(player)
+    }
+}
+
+calcScore(player){
+    playerScore++
+    if (winGame){
+        checkSetWin(player)
+    }
+    if (advantage){
+        do advantage Stuff
+    }
+    else{
+        return ScoreEventThingyGUI
+    }
+}
+
+
+checkSetWin(player){
+    if (setWon){
+        checkGameWin(Player)
+    }
+    if (tie){
+        return tieBreakThingyGUI
+    }
+    else{
+        return setScoreThingyGUI
+    }
+}
