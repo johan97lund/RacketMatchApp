@@ -133,7 +133,35 @@ class PaddelEngine(private val setLimit : Int = 5){
 
     //entry point increase score player
     fun increaseScore(scoringPlayer: Boolean) : GameEvent{
-        return calcScore(scoringPlayer);
+        if (tieBreak){
+            return tiebreakThingy(scoringPlayer)
+        }else{
+            return calcScore(scoringPlayer)
+        }
+
+    }
+
+    private fun tiebreakThingy(scoringPlayer: Boolean) : GameEvent{
+        val scoringPlayerIndex = if (scoringPlayer) 0 else 1
+        val opponentPlayerIndex = if (scoringPlayer) 1 else 0
+
+        val scoringPlayer = players[scoringPlayerIndex]
+        val opponentPlayer = players[opponentPlayerIndex]
+
+        scoringPlayer.TieBreakScore++
+        if (scoringPlayer.TieBreakScore >= 7 && (scoringPlayer.TieBreakScore - opponentPlayer.TieBreakScore) >= 2){
+            scoringPlayer.setScore++
+            if (scoringPlayer.setScore >= (setLimit / 2) + 1){
+                resetAfterSetWin()
+                return GameEvent.GameOver(scoringPlayerIndex);
+            }else{
+                resetAfterSetWin()
+                return GameEvent.SetScore(scoringPlayerIndex)
+            }
+        }else{
+            return GameEvent.Score(scoringPlayerIndex)
+        }
+
     }
 
     private fun calcScore(scoringPlayer: Boolean): GameEvent {
@@ -144,19 +172,6 @@ class PaddelEngine(private val setLimit : Int = 5){
 
         val scoringPlayer = players[scoringPlayerIndex]
         val opponentPlayer = players[opponentPlayerIndex]
-        if (tieBreak){
-            scoringPlayer.TieBreakScore++
-            if (scoringPlayer.TieBreakScore >= 7 && (scoringPlayer.TieBreakScore - opponentPlayer.TieBreakScore) >= 2){
-                scoringPlayer.setScore++
-                if (scoringPlayer.setScore >= (setLimit / 2) + 1){
-                    resetAfterSetWin()
-                    return GameEvent.GameOver(scoringPlayerIndex);
-                }else{
-                    resetAfterSetWin()
-                    return GameEvent.SetScore(scoringPlayerIndex)
-                }
-            }
-        }
         if (inDeuce){
             if (scoringPlayer.score == PadelScore.FORTY){
                 if (opponentPlayer.score == PadelScore.ADVANTAGE){

@@ -170,7 +170,7 @@ private fun TieBreakDialog(
         onDismissRequest = { tieBreakState.value = false },
         title = { Text("Start tiebreak?") },
         text = { Text("It's 6–6. Start a tiebreak?  to serve.") },
-        confirmButton = { TextButton(onClick = confirm) { Text("Start") } },
+        confirmButton = { TextButton(onClick = confirm ) { Text("Start") } },
         dismissButton = { TextButton(onClick = onBack) { Text("No, continue set") } }
     )
 }
