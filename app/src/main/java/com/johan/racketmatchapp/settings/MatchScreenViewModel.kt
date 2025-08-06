@@ -67,7 +67,7 @@ class GenericEngine(
     }
 }
 enum class PadelScore {
-    LOVE, FIFTEEN, THIRTY, FORTY, ADVANTAGE, WON
+    LOVE, FIFTEEN, THIRTY, FORTY, ADVANTAGE
 }
 data class PlayerState(
     var score: PadelScore = PadelScore.LOVE,
@@ -127,12 +127,11 @@ class PaddelEngine(private val setLimit : Int = 5){
             PadelScore.THIRTY  -> "THIRTY"
             PadelScore.FORTY  -> "FORTY"
             PadelScore.ADVANTAGE -> "ADVANTAGE"
-            PadelScore.WON -> "WON"
         }
     }
 
 
-
+    //entry point increase score player
     fun increaseScore(scoringPlayer: Boolean) : GameEvent{
         return calcScore(scoringPlayer);
     }
@@ -146,36 +145,46 @@ class PaddelEngine(private val setLimit : Int = 5){
         val scoringPlayer = players[scoringPlayerIndex]
         val opponentPlayer = players[opponentPlayerIndex]
         if (tieBreak){
-            TODO()
+            scoringPlayer.TieBreakScore++
+            if (scoringPlayer.TieBreakScore >= 7 && (scoringPlayer.TieBreakScore - opponentPlayer.TieBreakScore) >= 2){
+                scoringPlayer.setScore++
+                if (scoringPlayer.setScore >= (setLimit / 2) + 1){
+                    resetAfterSetWin()
+                    return GameEvent.GameOver(scoringPlayerIndex);
+                }else{
+                    resetAfterSetWin()
+                    return GameEvent.SetScore(scoringPlayerIndex)
+                }
+            }
         }
         if (inDeuce){
-            TODO()
-        }else{
+            if (scoringPlayer.score == PadelScore.FORTY){
+                if (opponentPlayer.score == PadelScore.ADVANTAGE){
+                    opponentPlayer.score = PadelScore.FORTY
+                    scoringPlayer.score = simpleIncrease(scoringPlayer.score) // du får advantage
+                    return GameEvent.Score(scoringPlayerIndex)
+                }else //opponent score = FORTY
+                {
+                    scoringPlayer.score = simpleIncrease(scoringPlayer.score)
+                    return GameEvent.Score(scoringPlayerIndex)
+                }
+            }else{
+                //du vann DEUCE
+                return gameWin(scoringPlayer, opponentPlayer, scoringPlayerIndex, opponentPlayerIndex)
+            }
+        }else{ // normal scoring
             val TryScore : PadelScore = simpleIncrease(scoringPlayer.score)
             if (triggerDeuce(TryScore, opponentPlayer)){
                 scoringPlayer.score = simpleIncrease(scoringPlayer.score)
                 inDeuce = true
                 return GameEvent.Deuce(scoringPlayerIndex)
-            }else{
+            }else{// om inte trigger deuce
                 // om vann "gameet"
                 if (TryScore == PadelScore.ADVANTAGE && opponentPlayer.score != PadelScore.FORTY){
                     //öka game score
                     //kolla om tiebreak
                     //kolla om vann settet
-                    scoringPlayer.gameScore++
-                    if (scoringPlayer.gameScore >= 6 && (scoringPlayer.gameScore - opponentPlayer.gameScore) >= 2){
-                        scoringPlayer.setScore++
-                        resetAfterSetWin();
-                        //kolla om vann hela matchen
-                        if (scoringPlayer.setScore >= (setLimit / 2) + 1){
-                            return GameEvent.GameOver(scoringPlayerIndex);
-                        }
-                        //kolla om de blir TieBreak
-                    }else if (scoringPlayer.gameScore == 6 && opponentPlayer.gameScore == 6){
-                        return GameEvent.TieBreak(scoringPlayerIndex);
-                    }
-                    resetAfterGameWin()
-                    return GameEvent.PaddelGameWon(scoringPlayerIndex)
+                    return gameWin(scoringPlayer, opponentPlayer, scoringPlayerIndex, opponentPlayerIndex)
                 }else{
                     scoringPlayer.score = TryScore;
                     return GameEvent.Score(scoringPlayerIndex)
@@ -185,11 +194,35 @@ class PaddelEngine(private val setLimit : Int = 5){
 
     }
 
+    fun gameWin(scoringPlayer : PlayerState, opponentPlayer: PlayerState, scoringPlayerIndex : Int, opponentPlayerIndex : Int) : GameEvent
+    {
+        scoringPlayer.gameScore++
+        if (scoringPlayer.gameScore >= 6 && (scoringPlayer.gameScore - opponentPlayer.gameScore) >= 2){
+            scoringPlayer.setScore++
+            resetAfterSetWin();
+            //kolla om vann hela matchen
+            if (scoringPlayer.setScore >= (setLimit / 2) + 1){
+                return GameEvent.GameOver(scoringPlayerIndex);
+            }
+            //kolla om de blir TieBreak
+        }else if (scoringPlayer.gameScore == 6 && opponentPlayer.gameScore == 6){
+            players.forEach { it ->
+                it.score = PadelScore.LOVE
+                it.TieBreakScore = 0
+            }
+            inDeuce = false
+            return GameEvent.TieBreak(scoringPlayerIndex);
+        }
+        resetAfterGameWin()
+        return GameEvent.PaddelGameWon(scoringPlayerIndex)
+
+    }
     fun resetAfterGameWin(){
         players.forEach { it ->
             it.score = PadelScore.LOVE
-            it.TieBreakScore = 0;
+            it.TieBreakScore = 0
         }
+        inDeuce = false
     }
 
     fun resetAfterSetWin(){
@@ -198,6 +231,7 @@ class PaddelEngine(private val setLimit : Int = 5){
             it.gameScore = 0;
             it.TieBreakScore = 0;
         }
+        tieBreak = false;
     }
 
 
@@ -223,8 +257,7 @@ class PaddelEngine(private val setLimit : Int = 5){
             PadelScore.FIFTEEN -> PadelScore.THIRTY
             PadelScore.THIRTY  -> PadelScore.FORTY
             PadelScore.FORTY  -> PadelScore.ADVANTAGE
-            PadelScore.ADVANTAGE -> PadelScore.WON
-            PadelScore.WON -> TODO()
+            PadelScore.ADVANTAGE -> PadelScore.ADVANTAGE
         }
     }
 }
@@ -325,7 +358,10 @@ class MatchScreenViewModel(
     fun decP1() = applyScore { TODO() }
     fun decP2() = applyScore { TODO() }
 
-    fun startTieBreak() = engine.setTieBreakTrue();
+    fun startTieBreak(){
+        engine.setTieBreakTrue()
+        updateUI()
+    }
 
     /*
     private fun winnerName() =
@@ -336,6 +372,11 @@ class MatchScreenViewModel(
 */
     private inline fun applyScore(block: () -> Any) {
         val event = block()
+        updateUI()
+
+        viewModelScope.launch { _events1.emit(event as GameEvent) }
+    }
+    private fun updateUI(){
         _uiState.update {
             it.copy(
                 p1Display = engine.getp1DisplayScore(),
@@ -345,15 +386,10 @@ class MatchScreenViewModel(
                 p1DisplaySet = engine.get1DisplaySet(),
                 p2DisplaySet = engine.get2DisplaySet(),
             )
-
         }
-
-        viewModelScope.launch { _events1.emit(event as GameEvent) }
     }
-
-
-
 }
+
 
 class MatchScreenVmFactory(private val sport: SportType) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T =

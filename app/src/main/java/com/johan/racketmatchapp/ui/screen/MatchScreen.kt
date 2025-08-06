@@ -25,6 +25,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -112,12 +113,18 @@ fun MatchScreen(
         }
     }
 
-    if (tieBreak.value){
+
+    if (tieBreak.value) { // Check the value of the MutableState
         TieBreakDialog(
             onBack = onBack,
-            confirm = vm::startTieBreak
+            confirm = {
+                vm.startTieBreak()
+                tieBreak.value = false // Also dismiss dialog on confirm
+            },
+            tieBreakState = tieBreak
         )
     }
+
 
     if (gameOver.value){
         GameOverDialog("jag", onBack)
@@ -156,10 +163,11 @@ private suspend fun SnackbarHostState.showFor(
 @Composable
 private fun TieBreakDialog(
     onBack: () -> Unit,
-    confirm: () -> Unit
+    confirm: () -> Unit,
+    tieBreakState: MutableState<Boolean>
 ) {
     AlertDialog(
-        onDismissRequest = onBack,
+        onDismissRequest = { tieBreakState.value = false },
         title = { Text("Start tiebreak?") },
         text = { Text("It's 6–6. Start a tiebreak?  to serve.") },
         confirmButton = { TextButton(onClick = confirm) { Text("Start") } },
@@ -206,10 +214,9 @@ private fun ScoreBoard(
 @Composable
 private fun PlayerRow(
     name: String,
-    score: String,
-
-    gameScore: String,
-    gameSet: String,
+    score: String, // Current point e.g. "AD", "30"
+    gameScore: String, // Games won in current set e.g. "5"
+    gameSet: String, // Sets won e.g. "1"
     onInc: () -> Unit,
     onDec: () -> Unit
 ) {
@@ -218,14 +225,27 @@ private fun PlayerRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(name, style = MaterialTheme.typography.titleLarge)
-        Text(score, style = MaterialTheme.typography.titleLarge)
-        Text(gameScore, style = MaterialTheme.typography.titleLarge)
-        Text(gameSet, style = MaterialTheme.typography.titleLarge)
+        // Option A: Inline labels with values
+        Text("$name", style = MaterialTheme.typography.titleLarge) // Name is already a label
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ScoreDisplayUnit(label = "Set", value = gameSet)
+            ScoreDisplayUnit(label = "Game", value = gameScore)
+            ScoreDisplayUnit(label = "Point", value = score)
+        }
+        // IconButton row
         Row {
             IconButton(onClick = onDec) { Icon(Icons.Filled.Remove, null) }
             IconButton(onClick = onInc) { Icon(Icons.Filled.Add, null) }
         }
+    }
+}
+
+// Helper composable for consistent label-value display
+@Composable
+fun ScoreDisplayUnit(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
+        Text(text = label, style = MaterialTheme.typography.labelSmall) // Smaller label
+        Text(text = value, style = MaterialTheme.typography.titleLarge) // Score value
     }
 }
 
