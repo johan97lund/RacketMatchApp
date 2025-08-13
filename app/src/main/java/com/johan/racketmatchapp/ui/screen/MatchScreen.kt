@@ -31,10 +31,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.johan.racketmatchapp.core.data.model.SportType
+import com.johan.racketmatchapp.ui.components.AppTopBar
 import com.johan.racketmatchapp.ui.viewmodel.GameEvent
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenData
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenViewModel
@@ -55,7 +55,9 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun MatchScreen(
     onBack: () -> Unit,
-    sportType: SportType
+    sportType: SportType,
+    navBluetooth: () -> Unit,
+    snackbarHostState : SnackbarHostState
 ) {
     val vm: MatchScreenViewModel = viewModel(
         factory = MatchScreenVmFactory(sportType)
@@ -65,33 +67,28 @@ fun MatchScreen(
     val gameOver = remember { mutableStateOf(false) }
 
 
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { padding ->
         Box(Modifier
             .fillMaxSize()
-            .padding(padding)
+            .padding(24.dp)
             .padding(24.dp)) {
 
-            if (!state.namesSet) {
+        if (!state.namesSet) {
                 Names(
                     onBack   = onBack,
                     uiState  = state,
                     setName1 = vm::setUser1,
                     setName2 = vm::setUser2,
-                    setSet = vm::setNamesSet
+                    setSet = vm::setNamesSet,
+                    navBlue = navBluetooth
                 )
             } else {
                 ScoreBoard(
-                    onBack = onBack,
                     uiState = state,
                     incP1 = vm::incP1, decP1 = vm::decP1,
                     incP2 = vm::incP2, decP2 = vm::decP2
                 )
             }
-        }
+
     }
 
     LaunchedEffect(vm) {
@@ -183,7 +180,6 @@ private fun GameOverDialog(
 
 @Composable
 private fun ScoreBoard(
-    onBack: () -> Unit,
     uiState: MatchScreenData,
     incP1: () -> Unit, decP1: () -> Unit,
     incP2: () -> Unit, decP2: () -> Unit
@@ -193,9 +189,7 @@ private fun ScoreBoard(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        IconButton(onClick = onBack, modifier = Modifier.align(Alignment.Start)) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
-        }
+
         Text(uiState.sport.name, style = MaterialTheme.typography.headlineMedium)
 
         PlayerRow(uiState.user1, uiState.p1Display, uiState.p1DisplayGame, uiState.p1DisplaySet, incP1, decP1)
@@ -235,16 +229,10 @@ fun Names(
     uiState: MatchScreenData,
     setName1: (String) -> Unit,
     setName2: (String) -> Unit,
-    setSet: (Boolean) -> Unit
+    setSet: (Boolean) -> Unit,
+    navBlue: () -> Unit
 ){
     Box (Modifier.fillMaxSize()) {
-        IconButton(
-            onClick = onBack,
-            modifier = Modifier.align(Alignment.TopStart)
-        ) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Tillbaka")
-        }
-
         Column(
             Modifier
                 .align(Alignment.Center)
@@ -267,13 +255,10 @@ fun Names(
             Button(onClick = { setSet(true) }) {
                 Text("Start game")
             }
+            Button(onClick = navBlue) {
+                Text("find players")
+            }
         }
     }
 
-}
-
-@Preview
-@Composable
-fun app(){
-    MatchScreen(onBack = {}, sportType = SportType.PICKLEBALL)
 }

@@ -36,21 +36,10 @@ import com.johan.racketmatchapp.core.data.model.SportType
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SportSelectionScreen(
-    onSelect: (SportType) -> Unit,
-    onBack: () -> Unit,
+    onSelect: (SportType) -> Unit
     ) {
     Surface(modifier = Modifier.fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
-        Box (modifier = Modifier.padding(24.dp)){
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.align(Alignment.TopStart)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Tillbaka"
-                )
-            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -70,7 +59,6 @@ fun SportSelectionScreen(
                 }
 
             }
-        }
     }
 }
 
@@ -96,5 +84,5 @@ private fun SportButton(
 @Preview(showBackground = true)
 @Composable
 fun SportSelectionScreenPreview() {
-    SportSelectionScreen(onSelect = {}, onBack = {println("tjena")})
+    SportSelectionScreen(onSelect = {})
 }

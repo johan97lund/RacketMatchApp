@@ -25,5 +25,7 @@ object Destinations {
 
     fun gameRoute(sport: SportType) = "${Game.baseRoute}/${sport.name}"
 
+    fun blueToothGameRoute(sport: SportType) = "${Game.baseRoute}bluetooth/${sport.name}"
+
     data class Route(val route: String, val baseRoute: String = route)
 }

@@ -30,41 +30,22 @@ import androidx.core.os.LocaleListCompat
  * @param onBack Lambda function to handle the back navigation action.
  * @param viewModel The [SettingsViewModel] instance used to manage the UI state.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onBack: () -> Unit,
     viewModel: SettingsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    /* ---- side‑effect: switch app locale when the enum changes ---- */
     LaunchedEffect(uiState.language) {
         val tags = uiState.language.name.lowercase()
         val locales = LocaleListCompat.forLanguageTags(tags)
-
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Inställningar") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Tillbaka"
-                        )
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
+
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -98,7 +79,7 @@ fun SettingsScreen(
                 }
 
                 DropdownMenu(expanded, onDismissRequest = { expanded = false }) {
-                    AppLanguage.values().forEach { lang ->
+                    AppLanguage.entries.forEach { lang ->
                         DropdownMenuItem(
                             text = { Text(lang.displayName) },
                             onClick = {
@@ -110,5 +91,4 @@ fun SettingsScreen(
                 }
             }
         }
-    }
 }

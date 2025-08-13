@@ -264,6 +264,7 @@ data class MatchScreenData(
     val p2DisplayGame : String = "0",
     val p1DisplaySet : String = "0",
     val p2DisplaySet : String = "0",
+
 )
 
 
@@ -304,7 +305,8 @@ class MatchScreenViewModel(
             p2DisplayGame = engine.get2DisplayGame(),
             p1DisplaySet = engine.get1DisplaySet(),
             p2DisplaySet = engine.get2DisplaySet(),
-            namesSet = false
+            namesSet = false,
+
         )
     )
 
