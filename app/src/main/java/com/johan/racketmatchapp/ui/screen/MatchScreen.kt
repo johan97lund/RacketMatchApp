@@ -34,11 +34,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.johan.racketmatchapp.data.model.SportType
-import com.johan.racketmatchapp.settings.GameEvent
-import com.johan.racketmatchapp.settings.MatchScreenData
-import com.johan.racketmatchapp.settings.MatchScreenViewModel
-import com.johan.racketmatchapp.settings.MatchScreenVmFactory
+import com.johan.racketmatchapp.core.data.model.SportType
+import com.johan.racketmatchapp.ui.viewmodel.GameEvent
+import com.johan.racketmatchapp.ui.viewmodel.MatchScreenData
+import com.johan.racketmatchapp.ui.viewmodel.MatchScreenViewModel
+import com.johan.racketmatchapp.ui.viewmodel.MatchScreenVmFactory
 import kotlinx.coroutines.flow.collectLatest
 
 
