@@ -1,7 +1,5 @@
 package com.johan.racketmatchapp.ui.screen
 
-import java.util.Locale
-import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -11,13 +9,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.johan.racketmatchapp.settings.SettingsViewModel
+import com.johan.racketmatchapp.ui.viewmodel.SettingsViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenuItem
-import com.johan.racketmatchapp.settings.AppLanguage
+import com.johan.racketmatchapp.ui.viewmodel.AppLanguage
 import androidx.core.os.LocaleListCompat
 
 
@@ -33,41 +30,22 @@ import androidx.core.os.LocaleListCompat
  * @param onBack Lambda function to handle the back navigation action.
  * @param viewModel The [SettingsViewModel] instance used to manage the UI state.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onBack: () -> Unit,
     viewModel: SettingsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    /* ---- side‑effect: switch app locale when the enum changes ---- */
     LaunchedEffect(uiState.language) {
         val tags = uiState.language.name.lowercase()
         val locales = LocaleListCompat.forLanguageTags(tags)
-
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Inställningar") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Tillbaka"
-                        )
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
+
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -101,7 +79,7 @@ fun SettingsScreen(
                 }
 
                 DropdownMenu(expanded, onDismissRequest = { expanded = false }) {
-                    AppLanguage.values().forEach { lang ->
+                    AppLanguage.entries.forEach { lang ->
                         DropdownMenuItem(
                             text = { Text(lang.displayName) },
                             onClick = {
@@ -113,5 +91,4 @@ fun SettingsScreen(
                 }
             }
         }
-    }
 }

@@ -1,9 +1,9 @@
-package com.johan.racketmatchapp.settings
+package com.johan.racketmatchapp.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.johan.racketmatchapp.data.model.SportType
+import com.johan.racketmatchapp.core.data.model.SportType
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.abs
+
 interface ScoreInterface {
     val p1Display: String
     val p2Display: String
@@ -43,7 +45,7 @@ class GenericEngine(
 
 
 
-    private fun won() = (p1 >= target || p2 >= target) && kotlin.math.abs(p1 - p2) >= winBy
+    private fun won() = (p1 >= target || p2 >= target) && abs(p1 - p2) >= winBy
 
     override fun  undoP1() = if (p1 > 0) { p1 -= step; p1Display = p1.toString() ; GameEvent.UndoScore(1)
     } else GameEvent.UndoScore(1)
@@ -310,6 +312,7 @@ data class MatchScreenData(
     val p2DisplayGame : String = "0",
     val p1DisplaySet : String = "0",
     val p2DisplaySet : String = "0",
+
 )
 
 
@@ -350,7 +353,8 @@ class MatchScreenViewModel(
             p2DisplayGame = engine.get2DisplayGame(),
             p1DisplaySet = engine.get1DisplaySet(),
             p2DisplaySet = engine.get2DisplaySet(),
-            namesSet = false
+            namesSet = false,
+
         )
     )
 

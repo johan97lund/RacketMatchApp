@@ -1,6 +1,6 @@
 package com.johan.racketmatchapp.ui.navigation
 
-import com.johan.racketmatchapp.data.model.SportType
+import com.johan.racketmatchapp.core.data.model.SportType
 
 /**
  * Object that defines the navigation destinations for the application.
@@ -24,6 +24,8 @@ object Destinations {
     val Settings         = Route("settings")
 
     fun gameRoute(sport: SportType) = "${Game.baseRoute}/${sport.name}"
+
+    fun blueToothGameRoute(sport: SportType) = "${Game.baseRoute}bluetooth/${sport.name}"
 
     data class Route(val route: String, val baseRoute: String = route)
 }

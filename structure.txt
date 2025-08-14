@@ -1,0 +1,117 @@
+.
+├── app
+│   ├── build.gradle.kts
+│   ├── proguard-rules.pro
+│   └── src
+│       ├── androidTest
+│       │   └── java
+│       │       └── com
+│       │           └── johan
+│       │               └── racketmatchapp
+│       │                   └── ExampleInstrumentedTest.kt
+│       ├── main
+│       │   ├── AndroidManifest.xml
+│       │   ├── java
+│       │   │   └── com
+│       │   │       └── johan
+│       │   │           └── racketmatchapp
+│       │   │               ├── MainActivity.kt
+│       │   │               ├── RacketMatchApp.kt
+│       │   │               ├── core
+│       │   │               │   ├── bluetooth
+│       │   │               │   │   └── README.md
+│       │   │               │   ├── data
+│       │   │               │   │   ├── README.md
+│       │   │               │   │   ├── local
+│       │   │               │   │   │   ├── AppDatabase.kt
+│       │   │               │   │   │   ├── PlayerDao.kt
+│       │   │               │   │   │   └── PlayerEntity.kt
+│       │   │               │   │   └── model
+│       │   │               │   │       ├── GameState.kt
+│       │   │               │   │       ├── SportType.kt
+│       │   │               │   │       └── Team.kt
+│       │   │               │   ├── settings
+│       │   │               │   │   ├── MatchScreenViewModel.kt
+│       │   │               │   │   ├── README.md
+│       │   │               │   │   ├── SettingsViewModel.kt
+│       │   │               │   │   └── data
+│       │   │               │   │       └── UserPreferences.kt
+│       │   │               │   └── util
+│       │   │               │       └── README.md
+│       │   │               ├── di
+│       │   │               │   └── DatabaseModule.kt
+│       │   │               └── ui
+│       │   │                   ├── README.md
+│       │   │                   ├── components
+│       │   │                   │   └── AppTopBar.kt
+│       │   │                   ├── navigation
+│       │   │                   │   ├── AppNavHost.kt
+│       │   │                   │   ├── Destinations.kt
+│       │   │                   │   ├── Screen.kt
+│       │   │                   │   └── test.txt
+│       │   │                   ├── screen
+│       │   │                   │   ├── MainScreen.kt
+│       │   │                   │   ├── MatchScreen.kt
+│       │   │                   │   ├── PadelScreen.kt
+│       │   │                   │   ├── RealMatchScreen.kt
+│       │   │                   │   ├── SettingsScreen.kt
+│       │   │                   │   └── SportSelectionScreen.kt
+│       │   │                   ├── theme
+│       │   │                   │   ├── Color.kt
+│       │   │                   │   ├── Theme.kt
+│       │   │                   │   └── Type.kt
+│       │   │                   └── viewmodel
+│       │   │                       ├── PlayerViewModel.kt
+│       │   │                       └── README.md
+│       │   └── res
+│       │       ├── drawable
+│       │       │   ├── ic_launcher_background.xml
+│       │       │   └── ic_launcher_foreground.xml
+│       │       ├── mipmap-anydpi-v26
+│       │       │   ├── ic_launcher.xml
+│       │       │   └── ic_launcher_round.xml
+│       │       ├── mipmap-hdpi
+│       │       │   ├── ic_launcher.webp
+│       │       │   └── ic_launcher_round.webp
+│       │       ├── mipmap-mdpi
+│       │       │   ├── ic_launcher.webp
+│       │       │   └── ic_launcher_round.webp
+│       │       ├── mipmap-xhdpi
+│       │       │   ├── ic_launcher.webp
+│       │       │   └── ic_launcher_round.webp
+│       │       ├── mipmap-xxhdpi
+│       │       │   ├── ic_launcher.webp
+│       │       │   └── ic_launcher_round.webp
+│       │       ├── mipmap-xxxhdpi
+│       │       │   ├── ic_launcher.webp
+│       │       │   └── ic_launcher_round.webp
+│       │       ├── values
+│       │       │   ├── colors.xml
+│       │       │   ├── strings.xml
+│       │       │   └── themes.xml
+│       │       └── xml
+│       │           ├── backup_rules.xml
+│       │           └── data_extraction_rules.xml
+│       └── test
+│           └── java
+│               └── com
+│                   └── johan
+│                       └── racketmatchapp
+│                           └── ExampleUnitTest.kt
+├── build.gradle.kts
+├── gradle
+│   ├── libs.versions.toml
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── local.properties
+├── readme.md
+├── settings.gradle.kts
+├── structure.txt
+└── structure_exports
+    └── app_structure.json
+
+46 directories, 69 files

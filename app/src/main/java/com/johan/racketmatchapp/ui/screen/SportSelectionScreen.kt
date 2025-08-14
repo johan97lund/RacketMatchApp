@@ -13,9 +13,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,8 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.compose.rememberNavController
-import com.johan.racketmatchapp.data.model.SportType
+import com.johan.racketmatchapp.core.data.model.SportType
 
 /**
  * Composable screen that allows the user to select a sport type.
@@ -39,21 +36,10 @@ import com.johan.racketmatchapp.data.model.SportType
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SportSelectionScreen(
-    onSelect: (SportType) -> Unit,
-    onBack: () -> Unit,
+    onSelect: (SportType) -> Unit
     ) {
     Surface(modifier = Modifier.fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
-        Box (modifier = Modifier.padding(24.dp)){
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.align(Alignment.TopStart)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Tillbaka"
-                )
-            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -73,7 +59,6 @@ fun SportSelectionScreen(
                 }
 
             }
-        }
     }
 }
 
@@ -99,5 +84,5 @@ private fun SportButton(
 @Preview(showBackground = true)
 @Composable
 fun SportSelectionScreenPreview() {
-    SportSelectionScreen(onSelect = {}, onBack = {println("tjena")})
+    SportSelectionScreen(onSelect = {})
 }
