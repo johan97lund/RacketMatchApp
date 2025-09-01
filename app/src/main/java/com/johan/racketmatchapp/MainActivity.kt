@@ -1,5 +1,6 @@
 package com.johan.racketmatchapp
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+
             val settingsVM: SettingsViewModel = viewModel()
             val uiState by settingsVM.uiState.collectAsState()
 

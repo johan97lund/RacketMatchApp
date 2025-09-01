@@ -41,7 +41,6 @@ import com.johan.racketmatchapp.ui.screen.BluetoothMatchScreen
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
-
     // Hämta aktuell rutt för att styra AppTopBar
     val backStackEntry = navController.currentBackStackEntryAsState().value
     val currentRoute = backStackEntry?.destination?.route

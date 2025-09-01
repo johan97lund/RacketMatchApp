@@ -1,5 +1,6 @@
 package com.johan.racketmatchapp.ui.viewmodel
 
+import android.bluetooth.BluetoothDevice
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.johan.racketmatchapp.core.data.model.SportType
@@ -9,7 +10,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 data class viewData(
-    val searching : Boolean
+    val searching : Boolean,
+    val blueToothDevices : List<BluetoothDevice> = emptyList(),
+    val isBlueToothEnabled : Boolean,
+    val isBlueToothSupported : Boolean,
+    val isScanning : Boolean,
 )
 
 class MatchBluetoothViewModel(
@@ -18,9 +23,16 @@ class MatchBluetoothViewModel(
 
     private val _uiState = MutableStateFlow(
         viewData(
-            searching = true
+            searching = true,
+            isBlueToothEnabled = false,
+            isBlueToothSupported = false,
+            isScanning = false
         )
     )
+
+
+
+
 
     val uiState: StateFlow<viewData> = _uiState.asStateFlow()
 
