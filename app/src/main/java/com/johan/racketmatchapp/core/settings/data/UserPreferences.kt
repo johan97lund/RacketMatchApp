@@ -25,6 +25,8 @@ class UserPreferences(private val context: Context) {
     private companion object {
         val DARK_MODE_KEY  = booleanPreferencesKey("dark_mode")
         val LANGUAGE_KEY   = stringPreferencesKey("language")
+
+        val BLUETOOTH_ENABLED_KEY = booleanPreferencesKey("bluetooth_enabled")
     }
 
     /** Emits true/false, default false. */
@@ -39,6 +41,11 @@ class UserPreferences(private val context: Context) {
                 ?: AppLanguage.SV          // default
         }
 
+    val bluetoothEnabledFlow: Flow<Boolean> = context.dataStore.data
+        .map { prefs -> prefs[BLUETOOTH_ENABLED_KEY] ?: false }
+
+
+
     /* -------- setters that write to disk -------- */
 
     suspend fun setDarkMode(enabled: Boolean) {
@@ -47,6 +54,10 @@ class UserPreferences(private val context: Context) {
 
     suspend fun setLanguage(lang: AppLanguage) {
         context.dataStore.edit { it[LANGUAGE_KEY] = lang.name }
+    }
+
+    suspend fun setBluetoothEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[BLUETOOTH_ENABLED_KEY] = enabled }
     }
 
     suspend fun readDarkModeOnce(): Boolean =

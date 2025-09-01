@@ -13,11 +13,13 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
@@ -34,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -50,6 +53,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.google.android.gms.common.wrappers.Wrappers.packageManager
 import com.johan.racketmatchapp.core.bluetooth.BlueToothController
 import com.johan.racketmatchapp.core.data.model.SportType
@@ -67,15 +71,16 @@ fun BluetoothMatchScreen(
     onBack: () -> Unit,
     sportType: SportType
 ) {
+
     val context = LocalContext.current
     val blueToothController = BlueToothController(context)
     val state = rememberMultiplePermissionsState(blueToothController.getRequiredPermissions())
 
-    val visaLåda = remember { mutableStateOf(false) }
-    if (visaLåda.value){
+    val showRationalDialog = remember { mutableStateOf(false) }
+    if (showRationalDialog.value) {
         AlertDialog(
             onDismissRequest = {
-                visaLåda.value = false
+                showRationalDialog.value = false
             },
             title = {
                 Text(
@@ -86,24 +91,20 @@ fun BluetoothMatchScreen(
             },
             text = {
                 Text(
-                    "The notification is important for this app. Please grant the permission.",
+                    "give me permisson",
                     fontSize = 16.sp
                 )
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        visaLåda.value = false
-                        for (permission in state.permissions) {
-                            val intent = Intent(
-                                permission.permission,
-                                Uri.fromParts("package", context.packageName, null)
-                            ).apply {
-                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            }
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            startActivity(context, intent, null)
-                        }
+                        showRationalDialog.value = false
+                        val intent = Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.fromParts("package", context.packageName, null)
+                        )
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(context, intent, null)
 
                     }) {
                     Text("OK", style = TextStyle(color = Color.Black))
@@ -112,14 +113,67 @@ fun BluetoothMatchScreen(
             dismissButton = {
                 TextButton(
                     onClick = {
-                        visaLåda.value = false
+                        showRationalDialog.value = false
                     }) {
                     Text("Cancel", style = TextStyle(color = Color.Black))
                 }
             },
         )
-
     }
+
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(5.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Button(onClick = {
+                    if (!state.allPermissionsGranted) {
+                        if (state.shouldShowRationale) {
+                            // Show a rationale if needed (optional)
+                            showRationalDialog.value = true
+                        } else {
+                            // Request the permission
+                            state.launchMultiplePermissionRequest()
+
+                        }
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "We have camera and audio permission",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }) {
+                    Text(text = "Ask for permission")
+                }
+                Text(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp),
+                    text = if (state.allPermissionsGranted) {
+                        "All Permission Granted"
+                    } else if (state.shouldShowRationale) {
+                        // If the user has denied the permission but the rationale can be shown,
+                        // then gently explain why the app requires this permission
+                        if (state.revokedPermissions.size == 2) {
+                            "We need camera and audio permission to shoot video"
+                        } else if (state.revokedPermissions.first().permission == Manifest.permission.CAMERA) {
+                            "We need camera permission. Please grant the permission."
+                        } else {
+                            "We need audio permission. Please grant the permission."
+                        }
+                    } else {
+                        // If it's the first time the user lands on this feature, or the user
+                        // doesn't want to be asked again for this permission, explain that the
+                        // permission is required
+                        "We need camera and audio permission to shoot video"
+                    },
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
+        }
 
 
 

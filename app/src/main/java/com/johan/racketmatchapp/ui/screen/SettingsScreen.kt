@@ -62,6 +62,18 @@ fun SettingsScreen(
                 )
             }
 
+            Row (Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Bluetooth")
+                Switch(
+                    checked = uiState.bluetoothEnabled,
+                    onCheckedChange = viewModel::setBluetoothEnabled
+                )
+            }
+
+
             /* -------- language picker -------- */
             var expanded by remember { mutableStateOf(false) }
 

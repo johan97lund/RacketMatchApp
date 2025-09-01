@@ -16,7 +16,8 @@ enum class AppLanguage(val displayName: String) {
 }
 data class UiState(
     val darkMode: Boolean = false,
-    val language: AppLanguage = AppLanguage.EN
+    val language: AppLanguage = AppLanguage.EN,
+    val bluetoothEnabled: Boolean = false
 )
 /**
  * ViewModel for managing the settings screen's state and user preferences.
@@ -38,8 +39,9 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             combine(
                 prefs.darkModeFlow,
-                prefs.languageFlow
-            ) { dark, lang -> UiState(dark, lang) }
+                prefs.languageFlow,
+                prefs.bluetoothEnabledFlow
+            ) { dark, lang, bluetooth -> UiState(dark, lang, bluetooth) }
                 .collect { _uiState.value = it }
         }
     }
@@ -53,5 +55,10 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
     fun setLanguage(lang: AppLanguage) = viewModelScope.launch {
         prefs.setLanguage(lang)
     }
+
+    fun setBluetoothEnabled(enabled: Boolean) = viewModelScope.launch {
+        prefs.setBluetoothEnabled(enabled)
+    }
+
 }
 
