@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-
+            AppRoot()
             val settingsVM: SettingsViewModel = viewModel()
             val uiState by settingsVM.uiState.collectAsState()
 

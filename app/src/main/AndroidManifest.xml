@@ -4,6 +4,14 @@
     <uses-permission android:name="android.permission.BLUETOOTH"
         android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!-- Android 12+ Bluetooth permissions -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
+
+    <!-- If you scan on <= Android 10 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 
     <!-- Needed only if your app looks for Bluetooth devices.
@@ -11,7 +19,6 @@
          location information, you can
          <a href="#assert-never-for-location">strongly assert that your app
          doesn't derive physical location</a>. -->
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 
     <!-- Needed only if your app makes the device discoverable to Bluetooth
          devices. -->
@@ -20,6 +27,8 @@
     <!-- Needed only if your app communicates with already-paired Bluetooth
          devices. -->
 
+    <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
 
 
 
