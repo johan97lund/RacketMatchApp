@@ -124,11 +124,11 @@ class PaddelEngine(private val setLimit : Int = 5){
 
     fun padelScoreToString(score: PadelScore): String {
         return when (score){
-            PadelScore.LOVE    -> "LOVE"
-            PadelScore.FIFTEEN -> "FIFTEEN"
-            PadelScore.THIRTY  -> "THIRTY"
-            PadelScore.FORTY  -> "FORTY"
-            PadelScore.ADVANTAGE -> "ADVANTAGE"
+            PadelScore.LOVE    -> "0"
+            PadelScore.FIFTEEN -> "15"
+            PadelScore.THIRTY  -> "30"
+            PadelScore.FORTY  -> "40"
+            PadelScore.ADVANTAGE -> "ADV"
         }
     }
 

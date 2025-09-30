@@ -13,12 +13,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,27 +31,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.johan.racketmatchapp.core.data.model.SportType
-import com.johan.racketmatchapp.ui.components.AppTopBar
 import com.johan.racketmatchapp.ui.viewmodel.GameEvent
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenData
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenViewModel
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenVmFactory
 import kotlinx.coroutines.flow.collectLatest
 
-
 /**
- * Composable screen for application settings.
- *
- * Provides options for toggling dark mode and selecting the app's language.
- * The language selection updates the app's locale and restarts the activity
- * to apply the changes.
- *
- * @param onBack Lambda function to handle the back navigation action.
- * @param viewModel The [SettingsViewModel] instance used to manage the UI state.
+ * Match screen with one big combined scoreboard (p1–p2).
  */
+
 @Composable
 fun MatchScreen(
     onBack: () -> Unit,
@@ -67,29 +59,28 @@ fun MatchScreen(
     val tieBreak = remember { mutableStateOf(false) }
     val gameOver = remember { mutableStateOf(false) }
 
-
-        Box(Modifier
+    Box(
+        Modifier
             .fillMaxSize()
             .padding(24.dp)
-            .padding(24.dp)) {
-
+            .padding(24.dp)
+    ) {
         if (!state.namesSet) {
-                Names(
-                    onBack   = onBack,
-                    uiState  = state,
-                    setName1 = vm::setUser1,
-                    setName2 = vm::setUser2,
-                    setSet = vm::setNamesSet,
-                    navBlue = navBluetooth
-                )
-            } else {
-                ScoreBoard(
-                    uiState = state,
-                    incP1 = vm::incP1, decP1 = vm::decP1,
-                    incP2 = vm::incP2, decP2 = vm::decP2
-                )
-            }
-
+            Names(
+                onBack   = onBack,
+                uiState  = state,
+                setName1 = vm::setUser1,
+                setName2 = vm::setUser2,
+                setSet = vm::setNamesSet,
+                navBlue = navBluetooth
+            )
+        } else {
+            ScoreBoard(
+                uiState = state,
+                incP1 = vm::incP1, decP1 = vm::decP1,
+                incP2 = vm::incP2, decP2 = vm::decP2
+            )
+        }
     }
 
     LaunchedEffect(vm) {
@@ -110,25 +101,20 @@ fun MatchScreen(
         }
     }
 
-
-    if (tieBreak.value) { // Check the value of the MutableState
+    if (tieBreak.value) {
         TieBreakDialog(
             onBack = onBack,
             confirm = {
                 vm.startTieBreak()
-                tieBreak.value = false // Also dismiss dialog on confirm
+                tieBreak.value = false
             },
             tieBreakState = tieBreak
         )
     }
 
-
     if (gameOver.value){
         GameOverDialog("jag", onBack)
     }
-
-
-
 }
 
 private suspend fun SnackbarHostState.showFor(
@@ -172,7 +158,6 @@ private fun TieBreakDialog(
     )
 }
 
-
 @Composable
 private fun GameOverDialog(
     winner: String,
@@ -183,6 +168,26 @@ private fun GameOverDialog(
         title = { Text("Match over") },
         confirmButton = { TextButton(onClick = onBack) { Text("Exit") } },
         dismissButton = { TextButton(onClick = onBack) { Text("New match") } }
+    )
+}
+
+/* ----------------------- NY LAYOUT: EN STOR POÄNGTAVLA ----------------------- */
+
+private enum class Side { Left, Right }
+
+/** Stor central tavla: visar p1Display – p2Display (t.ex. 15–15, 40–30, Adv–40) */
+@Composable
+private fun CombinedScoreboard(
+    p1Display: String,
+    p2Display: String
+) {
+    Text(
+        text = "$p1Display – $p2Display",
+        style = MaterialTheme.typography.displayLarge,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
     )
 }
 
@@ -197,49 +202,107 @@ private fun ScoreBoard(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-
         Text(uiState.sport.name, style = MaterialTheme.typography.headlineMedium)
 
-        PlayerRow(uiState.user1, uiState.p1Display, uiState.p1DisplayGame, uiState.p1DisplaySet, incP1, decP1)
-        PlayerRow(uiState.user2, uiState.p2Display, uiState.p2DisplayGame, uiState.p2DisplaySet, incP2, decP2)
+        // >>> ENDAST EN STOR POÄNGTAVLA I MITTEN <<<
+        CombinedScoreboard(
+            p1Display = uiState.p1Display,
+            p2Display = uiState.p2Display
+        )
+
+        // Två kolumner: P1 vänster, P2 höger (utan "Point" här)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            PlayerSide(
+                name = uiState.user1,
+                gameScore = uiState.p1DisplayGame,
+                gameSet = uiState.p1DisplaySet,
+                onInc = incP1,
+                onDec = decP1,
+                modifier = Modifier.weight(1f),
+                side = Side.Left
+            )
+            PlayerSide(
+                name = uiState.user2,
+                gameScore = uiState.p2DisplayGame,
+                gameSet = uiState.p2DisplaySet,
+                onInc = incP2,
+                onDec = decP2,
+                modifier = Modifier.weight(1f),
+                side = Side.Right
+            )
+        }
     }
 }
 
 @Composable
-private fun PlayerRow(
+private fun PlayerSide(
     name: String,
-    score: String, // Current point e.g. "AD", "30"
-    gameScore: String, // Games won in current set e.g. "5"
-    gameSet: String, // Sets won e.g. "1"
+    gameScore: String,  // Games won in current set e.g. "5"
+    gameSet: String,    // Sets won e.g. "1"
     onInc: () -> Unit,
-    onDec: () -> Unit
+    onDec: () -> Unit,
+    modifier: Modifier = Modifier,
+    side: Side
 ) {
-    Row(
-        Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = modifier.padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // Option A: Inline labels with values
-        Text("$name", style = MaterialTheme.typography.titleLarge) // Name is already a label
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Namn
+        Text(
+            text = name,
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // Endast Set & Game här (Point tas bort – den visas i den stora tavlan)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             ScoreDisplayUnit(label = "Set", value = gameSet)
             ScoreDisplayUnit(label = "Game", value = gameScore)
-            ScoreDisplayUnit(label = "Point", value = score)
         }
-        // IconButton row
-        Row {
-            IconButton(onClick = onDec) { Icon(Icons.Filled.Remove, null) }
-            IconButton(onClick = onInc) { Icon(Icons.Filled.Add, null) }
+
+        // – / +
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            FilledIconButton(
+                onClick = onDec,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                )
+            ) {
+                Icon(Icons.Filled.Remove, contentDescription = "Minus")
+            }
+            FilledIconButton(
+                onClick = onInc,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Plus")
+            }
         }
     }
 }
 
-// Helper composable for consistent label-value display
+/* ----------------------------------------------------------------------------- */
+
 @Composable
 fun ScoreDisplayUnit(label: String, value: String, modifier: Modifier = Modifier) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
-        Text(text = label, style = MaterialTheme.typography.labelSmall) // Smaller label
-        Text(text = value, style = MaterialTheme.typography.titleLarge) // Score value
+        Text(text = label, style = MaterialTheme.typography.labelSmall)
+        Text(text = value, style = MaterialTheme.typography.titleLarge)
     }
 }
 
@@ -262,14 +325,13 @@ fun Names(
             TextField(
                 value = uiState.user1,
                 onValueChange = setName1,
-                label = { Text("Player 1 name") },
+                label = { Text("Player 1 name") },
                 singleLine = true
             )
-
             TextField(
                 value = uiState.user2,
                 onValueChange = setName2,
-                label = { Text("Player 2 name") },
+                label = { Text("Player 2 name") },
                 singleLine = true
             )
             Button(onClick = { setSet(true) }) {
@@ -280,5 +342,4 @@ fun Names(
             }
         }
     }
-
 }
