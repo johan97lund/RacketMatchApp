@@ -44,6 +44,11 @@ android {
 }
 
 dependencies {
+
+        implementation(libs.play.services.wearable)
+        implementation(libs.kotlinx.coroutines.play.services)
+   
+
     implementation(libs.hilt.android)
     implementation(libs.play.services.games)
     implementation(libs.material3)

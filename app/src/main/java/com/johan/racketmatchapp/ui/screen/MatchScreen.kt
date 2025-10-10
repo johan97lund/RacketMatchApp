@@ -1,5 +1,6 @@
 package com.johan.racketmatchapp.ui.screen
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -39,7 +41,9 @@ import com.johan.racketmatchapp.ui.viewmodel.GameEvent
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenData
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenViewModel
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenVmFactory
+import com.johan.racketmatchapp.wear.WearSync
 import kotlinx.coroutines.flow.collectLatest
+
 
 /**
  * Match screen with one big combined scoreboard (p1–p2).
@@ -58,6 +62,7 @@ fun MatchScreen(
     val state by vm.uiState.collectAsState()
     val tieBreak = remember { mutableStateOf(false) }
     val gameOver = remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Box(
         Modifier
@@ -80,6 +85,19 @@ fun MatchScreen(
                 incP1 = vm::incP1, decP1 = vm::decP1,
                 incP2 = vm::incP2, decP2 = vm::decP2
             )
+        }
+    }
+
+    LaunchedEffect(state.namesSet) {
+        if (state.namesSet) {
+            val result = try {
+                com.johan.racketmatchapp.wear.WearSync(context).sendStart()
+            } catch (t: Throwable) {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar(
+                    message = "Failed to start sync to Wear OS: ${t.localizedMessage}",
+                )
+            }
         }
     }
 
