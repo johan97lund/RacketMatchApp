@@ -26,3 +26,4 @@ dependencyResolutionManagement {
 rootProject.name = "RacketMatchApp"
 include(":app")
 include(":wear")
+include(":core-scoring")

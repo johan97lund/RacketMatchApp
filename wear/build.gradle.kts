@@ -1,4 +1,5 @@
 
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -12,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.johan.wear"
-        minSdk = 30           // Wear OS 3+
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -72,7 +73,7 @@ dependencies {
     // implementation(libs.androidx.ui)
     // implementation(libs.androidx.ui.graphics)
     // implementation(libs.androidx.ui.tooling.preview)
-    // implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.core.splashscreen) // eller senaste stabila
 
     // Tests / debug
     androidTestImplementation(platform(libs.androidx.compose.bom))

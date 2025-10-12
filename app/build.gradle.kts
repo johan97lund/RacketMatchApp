@@ -45,7 +45,6 @@ android {
 
 dependencies {
 
-        implementation(libs.play.services.wearable)
         implementation(libs.kotlinx.coroutines.play.services)
    
 
