@@ -178,14 +178,13 @@ class PaddelEngine(private val setLimit : Int = 5){
             if (scoringPlayer.score == PadelScore.FORTY){
                 if (opponentPlayer.score == PadelScore.ADVANTAGE){
                     opponentPlayer.score = PadelScore.FORTY
-                    scoringPlayer.score = simpleIncrease(scoringPlayer.score) // du får advantage
-                    return GameEvent.Score(scoringPlayerIndex)
-                }else //opponent score = FORTY
-                {
-                    scoringPlayer.score = simpleIncrease(scoringPlayer.score)
-                    return GameEvent.Score(scoringPlayerIndex)
+                    scoringPlayer.score = PadelScore.FORTY
+                    return GameEvent.Deuce(scoringPlayerIndex)
+                } else {
+                    scoringPlayer.score = PadelScore.ADVANTAGE
+                    return GameEvent.Advantage(scoringPlayerIndex)
                 }
-            }else{
+            } else {
                 //du vann DEUCE
                 return gameWin(scoringPlayer, opponentPlayer, scoringPlayerIndex, opponentPlayerIndex)
             }
@@ -312,8 +311,15 @@ data class MatchScreenData(
     val p2DisplayGame : String = "0",
     val p1DisplaySet : String = "0",
     val p2DisplaySet : String = "0",
+    val canUndoP1: Boolean = false,
+    val canUndoP2: Boolean = false,
 
 )
+sealed interface ScoreAction {
+    data class Score(val isP1: Boolean) : ScoreAction
+    data object StartTieBreak : ScoreAction
+}
+
 
 
 
@@ -321,9 +327,9 @@ data class MatchScreenData(
 class MatchScreenViewModel(
     private val initialSport: SportType
 ) : ViewModel() {
-    private val engine = PaddelEngine(
-
-        setLimit = 3
+    private val setLimit = 3
+    private var engine = PaddelEngine(
+        setLimit = setLimit
         /*
         target = when (initialSport){
             SportType.PADEL -> 15
@@ -342,6 +348,7 @@ class MatchScreenViewModel(
          */
 
     )
+    private val scoreHistory = mutableListOf<ScoreAction>()
     private val _uiState = MutableStateFlow(
         MatchScreenData(
             user1 = "",
@@ -354,6 +361,8 @@ class MatchScreenViewModel(
             p1DisplaySet = engine.get1DisplaySet(),
             p2DisplaySet = engine.get2DisplaySet(),
             namesSet = false,
+            canUndoP1 = false,
+            canUndoP2 = false,
 
         )
     )
@@ -372,12 +381,22 @@ class MatchScreenViewModel(
 
     fun setNamesSet(value: Boolean) = _uiState.update { it.copy(namesSet = value) }
 
-    fun incP1() = applyScore { engine.increaseScore(true) }
-    fun incP2() = applyScore { engine.increaseScore(false) }
-    fun decP1() = applyScore { TODO() }
-    fun decP2() = applyScore { TODO() }
+
+    fun incP1() {
+        scoreHistory.add(ScoreAction.Score(isP1 = true))
+        applyScore { engine.increaseScore(true) }
+    }
+
+    fun incP2() {
+        scoreHistory.add(ScoreAction.Score(isP1 = false))
+        applyScore { engine.increaseScore(false) }
+    }
+
+    fun decP1() = undoLastScore(isP1 = true)
+    fun decP2() = undoLastScore(isP1 = false)
 
     fun startTieBreak(){
+        scoreHistory.add(ScoreAction.StartTieBreak)
         engine.setTieBreakTrue()
         updateUI()
     }
@@ -389,13 +408,34 @@ class MatchScreenViewModel(
         else
             _uiState.value.user2
 */
-    private inline fun applyScore(block: () -> Any) {
+    private inline fun applyScore(block: () -> GameEvent) {
         val event = block()
         updateUI()
 
-        viewModelScope.launch { _events1.emit(event as GameEvent) }
+        viewModelScope.launch { _events1.emit(event) }
     }
+
+    private fun undoLastScore(isP1: Boolean) {
+        val lastAction = scoreHistory.lastOrNull() as? ScoreAction.Score
+        if (lastAction?.isP1 != isP1) return
+        scoreHistory.removeLast()
+        rebuildEngineFromHistory()
+        updateUI()
+        viewModelScope.launch { _events1.emit(GameEvent.UndoScore(if (isP1) 0 else 1)) }
+    }
+
+    private fun rebuildEngineFromHistory() {
+        val rebuilt = PaddelEngine(setLimit = setLimit)
+        scoreHistory.forEach { action ->
+            when (action) {
+                is ScoreAction.Score -> rebuilt.increaseScore(action.isP1)
+                ScoreAction.StartTieBreak -> rebuilt.setTieBreakTrue()
+            }
+        }
+        engine = rebuilt    }
+
     private fun updateUI(){
+        val lastScore = scoreHistory.lastOrNull() as? ScoreAction.Score
         _uiState.update {
             it.copy(
                 p1Display = engine.getp1DisplayScore(),
@@ -404,6 +444,8 @@ class MatchScreenViewModel(
                 p2DisplayGame = engine.get2DisplayGame(),
                 p1DisplaySet = engine.get1DisplaySet(),
                 p2DisplaySet = engine.get2DisplaySet(),
+                canUndoP1 = lastScore?.isP1 == true,
+                canUndoP2 = lastScore?.isP1 == false
             )
         }
     }

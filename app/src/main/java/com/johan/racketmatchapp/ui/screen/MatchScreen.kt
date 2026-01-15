@@ -131,8 +131,10 @@ fun MatchScreen(
     }
 
     if (gameOver.value){
-        GameOverDialog("jag", onBack)
-    }
+        val p1Sets = state.p1DisplaySet.toIntOrNull() ?: 0
+        val p2Sets = state.p2DisplaySet.toIntOrNull() ?: 0
+        val winner = if (p1Sets >= p2Sets) state.user1 else state.user2
+        GameOverDialog(winner, onBack)    }
 }
 
 private suspend fun SnackbarHostState.showFor(
@@ -184,6 +186,7 @@ private fun GameOverDialog(
     AlertDialog(
         onDismissRequest = onBack,
         title = { Text("Match over") },
+        text = { Text("$winner won the match.") },
         confirmButton = { TextButton(onClick = onBack) { Text("Exit") } },
         dismissButton = { TextButton(onClick = onBack) { Text("New match") } }
     )
@@ -242,6 +245,7 @@ private fun ScoreBoard(
                 gameSet = uiState.p1DisplaySet,
                 onInc = incP1,
                 onDec = decP1,
+                canUndo = uiState.canUndoP1,
                 modifier = Modifier.weight(1f),
                 side = Side.Left
             )
@@ -251,6 +255,7 @@ private fun ScoreBoard(
                 gameSet = uiState.p2DisplaySet,
                 onInc = incP2,
                 onDec = decP2,
+                canUndo = uiState.canUndoP2,
                 modifier = Modifier.weight(1f),
                 side = Side.Right
             )
@@ -265,6 +270,7 @@ private fun PlayerSide(
     gameSet: String,    // Sets won e.g. "1"
     onInc: () -> Unit,
     onDec: () -> Unit,
+    canUndo: Boolean,
     modifier: Modifier = Modifier,
     side: Side
 ) {
@@ -294,6 +300,7 @@ private fun PlayerSide(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             FilledIconButton(
                 onClick = onDec,
+                enabled = canUndo,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.error,
                     contentColor = MaterialTheme.colorScheme.onError

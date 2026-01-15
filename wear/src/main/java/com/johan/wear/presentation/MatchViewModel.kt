@@ -82,10 +82,10 @@ class PaddelEngine(private val setLimit: Int = 5) {
                 if (players[oppIdx].score == PadelScore.ADVANTAGE) {
                     players[oppIdx].score = PadelScore.FORTY
                     players[idx].score = PadelScore.FORTY
-                    return GameEvent.Score(idx)
+                    return GameEvent.Deuce(idx)
                 } else {
                     players[idx].score = PadelScore.ADVANTAGE
-                    return GameEvent.Score(idx)
+                    return GameEvent.Advantage(idx)
                 }
             } else {
                 return gameWin(idx, oppIdx)
