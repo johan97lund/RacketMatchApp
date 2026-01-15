@@ -66,6 +66,8 @@ dependencies {
     implementation(libs.androidx.wear.compose.foundation)
     implementation(libs.androidx.wear.tooling.preview)
 
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
     // Activity/Compose bridge
     implementation(libs.androidx.activity.compose)
 

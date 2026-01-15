@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.play.services.games)
     implementation(libs.material3)
+    implementation(libs.play.services.wearable)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx.v250)
@@ -80,4 +81,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("com.google.accompanist:accompanist-permissions:0.37.3")
+    implementation(libs.timber)
 }

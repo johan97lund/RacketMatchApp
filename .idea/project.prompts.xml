@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PromptTemplates">
+    <option name="builtInPromptOverrides">
+      <list>
+        <BuiltInPromptOverride>
+          <option name="groupId" value="rules" />
+          <option name="promptId" value="project" />
+          <option name="text" value="RacketMatchApp – Project Rules&#10;- Language: Kotlin only.&#10;- UI: Prefer Jetpack Compose + Material 3. If XML is required, keep layouts minimal and consistent.&#10;- App goal/UX: Optimize for fast scoring during a match: very large text, huge +/− buttons, minimal clicks, clear match state (sport, teams, points, sets), quick “end match” flow, and optional vibration feedback. &#10;- Architecture: Use MVVM (ViewModel + immutable UI state). Match rules go in a pure Kotlin MatchLogic/domain layer (unit-testable).&#10;- Persistence: Use Room for saved matches + history. Use DataStore (Preferences) for “reuse last settings automatically”.&#10;- Output format (when you answer):&#10;Brief plan, 2) exact files to create/edit, 3) Kotlin code, 4) how to test it, 5) common pitfalls." />
+        </BuiltInPromptOverride>
+      </list>
+    </option>
+  </component>
+</project>
