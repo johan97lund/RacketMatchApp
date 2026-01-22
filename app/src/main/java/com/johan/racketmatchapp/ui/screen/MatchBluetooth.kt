@@ -57,7 +57,7 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.google.android.gms.common.wrappers.Wrappers.packageManager
 import com.johan.racketmatchapp.core.bluetooth.BlueToothController
 import com.johan.racketmatchapp.core.data.model.SportType
-import com.johan.racketmatchapp.ui.viewmodel.GameEvent
+import com.johan.racketmatchapp.core.scoring.padel.GameEvent
 import com.johan.racketmatchapp.ui.viewmodel.MatchBluetoothViewModel
 import com.johan.racketmatchapp.ui.viewmodel.MatchBluetoothVmFactory
 import kotlinx.coroutines.flow.collectLatest

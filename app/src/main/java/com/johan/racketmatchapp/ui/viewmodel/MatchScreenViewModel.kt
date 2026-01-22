@@ -3,6 +3,8 @@ package com.johan.racketmatchapp.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.johan.racketmatchapp.core.scoring.padel.GameEvent
+import com.johan.racketmatchapp.core.scoring.padel.PadelEngine
 import com.johan.racketmatchapp.core.data.model.SportType
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,238 +70,6 @@ class GenericEngine(
         return GameEvent.Score(2);
     }
 }
-enum class PadelScore {
-    LOVE, FIFTEEN, THIRTY, FORTY, ADVANTAGE
-}
-data class PlayerState(
-    var score: PadelScore = PadelScore.LOVE,
-    var gameScore: Int = 0,
-    var setScore: Int = 0,
-    var TieBreakScore: Int = 0
-)
-
-data class MatchHistory(
-    var history : List<GameEvent>
-)
-class PaddelEngine(private val setLimit : Int = 5){
-
-    private val players = listOf(PlayerState(), PlayerState())
-
-    var tieBreak : Boolean = false;
-    var tieBreakSet : Boolean = false;
-    var inDeuce : Boolean = false;
-
-    fun getp1DisplayScore(): String {
-        if (tieBreak){
-            return players[0].TieBreakScore.toString()
-        }else{
-            return padelScoreToString(players[0].score)
-        }
-    }
-    fun getp2DisplayScore(): String {
-        if (tieBreak){
-            return players[1].TieBreakScore.toString()
-        }else{
-            return padelScoreToString(players[1].score)
-        }
-    }
-
-    fun get1DisplayGame() : String {
-        return players[0].gameScore.toString()
-    }
-    fun get2DisplayGame() : String{
-        return players[1].gameScore.toString()
-    }
-    fun get1DisplaySet() : String{
-        return players[0].setScore.toString()
-    }
-    fun get2DisplaySet() : String{
-        return players[1].setScore.toString()
-    }
-
-    fun setTieBreakTrue(){
-        tieBreak = true;
-    }
-
-
-    fun padelScoreToString(score: PadelScore): String {
-        return when (score){
-            PadelScore.LOVE    -> "0"
-            PadelScore.FIFTEEN -> "15"
-            PadelScore.THIRTY  -> "30"
-            PadelScore.FORTY  -> "40"
-            PadelScore.ADVANTAGE -> "ADV"
-        }
-    }
-
-
-    //entry point increase score player
-    fun increaseScore(scoringPlayer: Boolean) : GameEvent{
-        if (tieBreak){
-            return tiebreakThingy(scoringPlayer)
-        }else{
-            return calcScore(scoringPlayer)
-        }
-
-    }
-
-    private fun tiebreakThingy(scoringPlayer: Boolean) : GameEvent{
-        val scoringPlayerIndex = if (scoringPlayer) 0 else 1
-        val opponentPlayerIndex = if (scoringPlayer) 1 else 0
-
-        val scoringPlayer = players[scoringPlayerIndex]
-        val opponentPlayer = players[opponentPlayerIndex]
-
-        scoringPlayer.TieBreakScore++
-        if (scoringPlayer.TieBreakScore >= 7 && (scoringPlayer.TieBreakScore - opponentPlayer.TieBreakScore) >= 2){
-            scoringPlayer.setScore++
-            if (scoringPlayer.setScore >= (setLimit / 2) + 1){
-                resetAfterSetWin()
-                return GameEvent.GameOver(scoringPlayerIndex);
-            }else{
-                resetAfterSetWin()
-                return GameEvent.SetScore(scoringPlayerIndex)
-            }
-        }else{
-            return GameEvent.Score(scoringPlayerIndex)
-        }
-
-    }
-
-    private fun calcScore(scoringPlayer: Boolean): GameEvent {
-        // om scoringPlayer == false -> scoring player == 2
-        // om scoringPlayer == true -> scoring player == 1
-        val scoringPlayerIndex = if (scoringPlayer) 0 else 1
-        val opponentPlayerIndex = if (scoringPlayer) 1 else 0
-
-        val scoringPlayer = players[scoringPlayerIndex]
-        val opponentPlayer = players[opponentPlayerIndex]
-        if (inDeuce){
-            if (scoringPlayer.score == PadelScore.FORTY){
-                if (opponentPlayer.score == PadelScore.ADVANTAGE){
-                    opponentPlayer.score = PadelScore.FORTY
-                    scoringPlayer.score = PadelScore.FORTY
-                    return GameEvent.Deuce(scoringPlayerIndex)
-                } else {
-                    scoringPlayer.score = PadelScore.ADVANTAGE
-                    return GameEvent.Advantage(scoringPlayerIndex)
-                }
-            } else {
-                //du vann DEUCE
-                return gameWin(scoringPlayer, opponentPlayer, scoringPlayerIndex, opponentPlayerIndex)
-            }
-        }else{ // normal scoring
-            val TryScore : PadelScore = simpleIncrease(scoringPlayer.score)
-            if (triggerDeuce(TryScore, opponentPlayer)){
-                scoringPlayer.score = simpleIncrease(scoringPlayer.score)
-                inDeuce = true
-                return GameEvent.Deuce(scoringPlayerIndex)
-            }else{// om inte trigger deuce
-                // om vann "gameet"
-                if (TryScore == PadelScore.ADVANTAGE && opponentPlayer.score != PadelScore.FORTY){
-                    //öka game score
-                    //kolla om tiebreak
-                    //kolla om vann settet
-                    return gameWin(scoringPlayer, opponentPlayer, scoringPlayerIndex, opponentPlayerIndex)
-                }else{
-                    scoringPlayer.score = TryScore;
-                    return GameEvent.Score(scoringPlayerIndex)
-                }
-            }
-        }
-
-    }
-
-    fun gameWin(scoringPlayer : PlayerState, opponentPlayer: PlayerState, scoringPlayerIndex : Int, opponentPlayerIndex : Int) : GameEvent
-    {
-        scoringPlayer.gameScore++
-        if (scoringPlayer.gameScore >= 6 && (scoringPlayer.gameScore - opponentPlayer.gameScore) >= 2){
-            scoringPlayer.setScore++
-            resetAfterSetWin();
-            //kolla om vann hela matchen
-            if (scoringPlayer.setScore >= (setLimit / 2) + 1){
-                return GameEvent.GameOver(scoringPlayerIndex);
-            }
-            //kolla om de blir TieBreak
-        }else if (scoringPlayer.gameScore == 6 && opponentPlayer.gameScore == 6){
-            players.forEach { it ->
-                it.score = PadelScore.LOVE
-                it.TieBreakScore = 0
-            }
-            inDeuce = false
-            return GameEvent.TieBreak(scoringPlayerIndex);
-        }
-        resetAfterGameWin()
-        return GameEvent.PaddelGameWon(scoringPlayerIndex)
-
-    }
-    fun resetAfterGameWin(){
-        players.forEach { it ->
-            it.score = PadelScore.LOVE
-            it.TieBreakScore = 0
-        }
-        inDeuce = false
-    }
-
-    fun resetAfterSetWin(){
-        players.forEach { it ->
-            it.score = PadelScore.LOVE
-            it.gameScore = 0;
-            it.TieBreakScore = 0;
-        }
-        tieBreak = false;
-    }
-
-
-
-    //
-    fun triggerDeuce(newScore: PadelScore, opponentPlayer : PlayerState): Boolean = newScore == PadelScore.FORTY && opponentPlayer.score == PadelScore.FORTY
-
-
-
-
-    private fun isDeuce(): Boolean {
-        if (players[0].score == PadelScore.FORTY && players[1].score == PadelScore.FORTY){
-            return true;
-        }else{
-            return false
-        }
-    }
-
-
-    fun simpleIncrease(score : PadelScore) : PadelScore{
-        return when (score){
-            PadelScore.LOVE    -> PadelScore.FIFTEEN
-            PadelScore.FIFTEEN -> PadelScore.THIRTY
-            PadelScore.THIRTY  -> PadelScore.FORTY
-            PadelScore.FORTY  -> PadelScore.ADVANTAGE
-            PadelScore.ADVANTAGE -> PadelScore.ADVANTAGE
-        }
-    }
-}
-
-
-
-sealed interface GameEvent {
-    data class GameOver(
-        val player: Int
-
-    )      : GameEvent
-    data class TieBreak(val player: Int) : GameEvent
-    data class Advantage(val player: Int)     : GameEvent
-    data class Score(val player: Int)         : GameEvent
-    data class UndoScore(val player: Int)     : GameEvent
-    data class Deuce(val player: Int)         : GameEvent
-
-    data class PaddelGameWon(val player: Int) : GameEvent
-
-    data class SetScore(val player: Int) : GameEvent
-
-}
-
-
-
-
 data class MatchScreenData(
     val user1: String,
     val user2: String,
@@ -328,7 +98,7 @@ class MatchScreenViewModel(
     private val initialSport: SportType
 ) : ViewModel() {
     private val setLimit = 3
-    private var engine = PaddelEngine(
+    private var engine = PadelEngine(
         setLimit = setLimit
         /*
         target = when (initialSport){
@@ -425,7 +195,7 @@ class MatchScreenViewModel(
     }
 
     private fun rebuildEngineFromHistory() {
-        val rebuilt = PaddelEngine(setLimit = setLimit)
+        val rebuilt = PadelEngine(setLimit = setLimit)
         scoreHistory.forEach { action ->
             when (action) {
                 is ScoreAction.Score -> rebuilt.increaseScore(action.isP1)
