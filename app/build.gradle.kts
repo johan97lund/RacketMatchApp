@@ -47,6 +47,7 @@ dependencies {
 
         implementation(libs.kotlinx.coroutines.play.services)
    
+    implementation(project(":core-scoring"))
 
     implementation(libs.hilt.android)
     implementation(libs.play.services.games)

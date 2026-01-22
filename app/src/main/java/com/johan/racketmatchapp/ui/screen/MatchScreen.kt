@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.johan.racketmatchapp.core.data.model.SportType
-import com.johan.racketmatchapp.ui.viewmodel.GameEvent
+import com.johan.racketmatchapp.core.scoring.padel.GameEvent
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenData
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenViewModel
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenVmFactory
