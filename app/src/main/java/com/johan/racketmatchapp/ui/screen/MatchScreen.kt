@@ -1,6 +1,5 @@
 package com.johan.racketmatchapp.ui.screen
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,7 +36,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.johan.racketmatchapp.core.data.model.SportType
-import com.johan.racketmatchapp.core.scoring.padel.GameEvent
+import com.johan.racketmatchapp.core.scoring.padel.ScoringEvent
+import com.johan.racketmatchapp.core.scoring.padel.Team
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenData
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenViewModel
 import com.johan.racketmatchapp.ui.viewmodel.MatchScreenVmFactory
@@ -105,10 +105,10 @@ fun MatchScreen(
         vm.events1.collectLatest { event ->
             val s = vm.uiState.value
             when (event) {
-                is GameEvent.TieBreak -> {
+                is ScoringEvent.ShowTiebreakPrompt -> {
                     tieBreak.value = true
                 }
-                is GameEvent.GameOver -> {
+                is ScoringEvent.MatchWon -> {
                     gameOver.value = true
                 }
                 else -> {
@@ -121,9 +121,12 @@ fun MatchScreen(
 
     if (tieBreak.value) {
         TieBreakDialog(
-            onBack = onBack,
             confirm = {
-                vm.startTieBreak()
+                vm.decideTieBreak(start = true)
+                tieBreak.value = false
+            },
+            dismiss = {
+                vm.decideTieBreak(start = false)
                 tieBreak.value = false
             },
             tieBreakState = tieBreak
@@ -138,22 +141,23 @@ fun MatchScreen(
 }
 
 private suspend fun SnackbarHostState.showFor(
-    event: GameEvent,
+    event: ScoringEvent,
     state: MatchScreenData
 ) {
     currentSnackbarData?.dismiss()
-    fun who(p: Int) = if (p == 0) state.user1 else state.user2
+    fun who(team: Team) = if (team == Team.P1) state.user1 else state.user2
 
     when (event) {
-        is GameEvent.Score         -> showSnackbar("Point for ${who(event.player)}")
-        is GameEvent.UndoScore     -> showSnackbar("Undid a point for ${who(event.player)}")
-        is GameEvent.Advantage     -> showSnackbar("Advantage ${who(event.player)}")
-        is GameEvent.Deuce         -> showSnackbar("Deuce")
-        is GameEvent.PaddelGameWon -> showSnackbar("${who(event.player)} won game")
-        is GameEvent.SetScore      -> showSnackbar("${who(event.player)} won the set")
-        is GameEvent.TieBreak      -> showSnackbar("Tiebreak — ${who(event.player)} to serve")
-        is GameEvent.GameOver -> {
-            val winner = who(event.player)
+        is ScoringEvent.PointScored -> showSnackbar("Point for ${who(event.team)}")
+        is ScoringEvent.UndoPoint -> showSnackbar("Undid a point for ${who(event.team)}")
+        is ScoringEvent.EnteredAdvantage -> showSnackbar("Advantage ${who(event.team)}")
+        is ScoringEvent.EnteredDeuce -> showSnackbar("Deuce")
+        is ScoringEvent.GameWon -> showSnackbar("${who(event.team)} won game")
+        is ScoringEvent.SetWon -> showSnackbar("${who(event.team)} won the set")
+        is ScoringEvent.TiebreakStarted -> showSnackbar("Tiebreak started")
+        is ScoringEvent.ShowTiebreakPrompt -> showSnackbar("Tiebreak? It's 6–6.")
+        is ScoringEvent.MatchWon -> {
+            val winner = who(event.team)
             showSnackbar(
                 message = "Game over — $winner wins ${state.p1Display}-${state.p2Display}",
                 withDismissAction = true,
@@ -165,8 +169,8 @@ private suspend fun SnackbarHostState.showFor(
 
 @Composable
 private fun TieBreakDialog(
-    onBack: () -> Unit,
     confirm: () -> Unit,
+    dismiss: () -> Unit,
     tieBreakState: MutableState<Boolean>
 ) {
     AlertDialog(
@@ -174,7 +178,7 @@ private fun TieBreakDialog(
         title = { Text("Start tiebreak?") },
         text = { Text("It's 6–6. Start a tiebreak?  to serve.") },
         confirmButton = { TextButton(onClick = confirm ) { Text("Start") } },
-        dismissButton = { TextButton(onClick = onBack) { Text("No, continue set") } }
+        dismissButton = { TextButton(onClick = dismiss) { Text("No, continue set") } }
     )
 }
 

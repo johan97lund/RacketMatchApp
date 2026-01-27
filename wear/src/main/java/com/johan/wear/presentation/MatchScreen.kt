@@ -2,13 +2,17 @@ package com.johan.wear.presentation
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.johan.racketmatchapp.core.scoring.padel.ScoringEvent
 import androidx.wear.compose.material.*
 
 @Composable
@@ -16,6 +20,15 @@ fun MatchScreen(
     viewModel: MatchViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val showTiebreakPrompt = remember { mutableStateOf(false) }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            if (event is ScoringEvent.ShowTiebreakPrompt) {
+                showTiebreakPrompt.value = true
+            }
+        }
+    }
 
     ScalingLazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -68,5 +81,29 @@ fun MatchScreen(
                 }
             }
         }
+    }
+
+    if (showTiebreakPrompt.value) {
+        AlertDialog(
+            onDismissRequest = { showTiebreakPrompt.value = false },
+            title = { Text("Start tiebreak?") },
+            message = { Text("It's 6–6. Start a tiebreak?") },
+            confirmButton = {
+                Button(onClick = {
+                    viewModel.decideTieBreak(start = true)
+                    showTiebreakPrompt.value = false
+                }) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    viewModel.decideTieBreak(start = false)
+                    showTiebreakPrompt.value = false
+                }) {
+                    Text("No")
+                }
+            }
+        )
     }
 }
