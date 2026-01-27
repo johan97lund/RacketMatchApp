@@ -2,8 +2,11 @@ package com.johan.wear.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.johan.racketmatchapp.core.scoring.padel.GameEvent
-import com.johan.racketmatchapp.core.scoring.padel.PadelEngine
+import com.johan.racketmatchapp.core.scoring.padel.MatchConfig
+import com.johan.racketmatchapp.core.scoring.padel.PadelScoringEngine
+import com.johan.racketmatchapp.core.scoring.padel.ScoringAction
+import com.johan.racketmatchapp.core.scoring.padel.ScoringEvent
+import com.johan.racketmatchapp.core.scoring.padel.Team
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -24,59 +27,67 @@ data class MatchUiState(
 )
 
 class MatchViewModel : ViewModel() {
-    private var engine = PadelEngine(setLimit = 3)
-    private val scoreHistory = mutableListOf<Boolean>() // true = P1, false = P2
+    private var engine = PadelScoringEngine(MatchConfig(setLimit = 3))
+    private val scoreHistory = mutableListOf<ScoringAction>()
     
     private val _uiState = MutableStateFlow(MatchUiState())
     val uiState: StateFlow<MatchUiState> = _uiState.asStateFlow()
 
-    private val _events = MutableSharedFlow<GameEvent>()
-    val events: SharedFlow<GameEvent> = _events.asSharedFlow()
+    private val _events = MutableSharedFlow<ScoringEvent>()
+    val events: SharedFlow<ScoringEvent> = _events.asSharedFlow()
 
     fun scoreP1() {
-        scoreHistory.add(true)
-        applyScore { engine.increaseScore(true) }
+        val action = ScoringAction.PointWon(Team.P1)
+        scoreHistory.add(action)
+        applyAction(action)
     }
 
     fun scoreP2() {
-        scoreHistory.add(false)
-        applyScore { engine.increaseScore(false) }
+        val action = ScoringAction.PointWon(Team.P2)
+        scoreHistory.add(action)
+        applyAction(action)
+    }
+
+    fun decideTieBreak(start: Boolean) {
+        val action = ScoringAction.TiebreakDecision(start)
+        scoreHistory.add(action)
+        applyAction(action)
     }
 
     fun undo() {
         if (scoreHistory.isNotEmpty()) {
-            scoreHistory.removeAt(scoreHistory.size - 1)
+            val removed = scoreHistory.removeAt(scoreHistory.size - 1)
             // Re-calculate state from scratch
-            engine = PadelEngine(setLimit = 3)
-            scoreHistory.forEach { scoredByP1 ->
-                val event = engine.increaseScore(scoredByP1)
-                if (event is GameEvent.TieBreak) {
-                    engine.setTieBreakTrue()
-                }
+            engine = PadelScoringEngine(MatchConfig(setLimit = 3))
+            scoreHistory.forEach { action ->
+                engine.apply(action)
             }
             updateUI()
-            viewModelScope.launch { _events.emit(GameEvent.UndoScore(0)) }
+            if (removed is ScoringAction.PointWon) {
+                viewModelScope.launch { _events.emit(ScoringEvent.UndoPoint(removed.team)) }
+            }
         }
     }
 
-    private fun applyScore(block: () -> GameEvent) {
-        val event = block()
-        if (event is GameEvent.TieBreak) {
-            engine.setTieBreakTrue()
-        }
+    private fun applyAction(action: ScoringAction) {
+        val result = engine.apply(action)
         updateUI()
-        viewModelScope.launch { _events.emit(event) }
+        viewModelScope.launch {
+            result.events.forEach { event ->
+                _events.emit(event)
+            }
+        }
     }
 
     private fun updateUI() {
         _uiState.update {
             it.copy(
-                p1Score = engine.getp1DisplayScore(),
-                p2Score = engine.getp2DisplayScore(),
-                p1Games = engine.get1DisplayGame(),
-                p2Games = engine.get2DisplayGame(),
-                p1Sets = engine.get1DisplaySet(),
-                p2Sets = engine.get2DisplaySet(),
+                p1Score = engine.state.displayPoint(Team.P1),
+                p2Score = engine.state.displayPoint(Team.P2),
+                p1Games = engine.state.displayGames(Team.P1),
+                p2Games = engine.state.displayGames(Team.P2),
+                p1Sets = engine.state.displaySets(Team.P1),
+                p2Sets = engine.state.displaySets(Team.P2),
                 canUndo = scoreHistory.isNotEmpty()
             )
         }
