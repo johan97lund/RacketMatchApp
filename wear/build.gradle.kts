@@ -58,7 +58,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(project(":core-scoring"))
 
-
     // Compose BOM
     implementation(platform(libs.androidx.compose.bom))
 

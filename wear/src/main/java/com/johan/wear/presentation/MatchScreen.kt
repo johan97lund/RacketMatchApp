@@ -9,11 +9,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.johan.racketmatchapp.core.scoring.padel.ScoringEvent
 import androidx.wear.compose.material.*
+import androidx.wear.compose.material.dialog.Alert
 
 @Composable
 fun MatchScreen(
@@ -84,26 +86,28 @@ fun MatchScreen(
     }
 
     if (showTiebreakPrompt.value) {
-        AlertDialog(
-            onDismissRequest = { showTiebreakPrompt.value = false },
-            title = { Text("Start tiebreak?") },
-            message = { Text("It's 6–6. Start a tiebreak?") },
-            confirmButton = {
-                Button(onClick = {
-                    viewModel.decideTieBreak(start = true)
-                    showTiebreakPrompt.value = false
-                }) {
-                    Text("Yes")
-                }
-            },
-            dismissButton = {
-                Button(onClick = {
-                    viewModel.decideTieBreak(start = false)
-                    showTiebreakPrompt.value = false
-                }) {
-                    Text("No")
-                }
+        Alert(
+        title = { Text("Start tiebreak?", textAlign = TextAlign.Center) },
+        negativeButton = {
+            Button(onClick = {
+                viewModel.decideTieBreak(start = false)
+                showTiebreakPrompt.value = false
+            }) {
+                Text("No")
             }
-        )
+        },
+        positiveButton = {
+            Button(onClick = {
+                viewModel.decideTieBreak(start = true)
+                showTiebreakPrompt.value = false
+            }) {
+                Text("Yes")
+            }
+        },
+        content = {
+            Text("It's 6–6. Start a tiebreak?", textAlign = TextAlign.Center)
+        }
+    )
     }
+
 }
